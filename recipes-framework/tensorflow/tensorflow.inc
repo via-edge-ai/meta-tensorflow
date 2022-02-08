@@ -1,15 +1,17 @@
 DESCRIPTION = "TensorFlow C/C++ Libraries"
 LICENSE = "Apache-2.0"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=64a34301f8e355f57ec992c2af3e5157"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=c7e17cca1ef4230861fb7868e96c387e"
 
 DEPENDS = "bazel-native protobuf-native util-linux-native protobuf"
-SRCREV = "582c8d236cb079023657287c318ff26adb239002"
-SRC_URI = "git://github.com/tensorflow/tensorflow.git;branch=r2.4 \
+SRCREV = "3aa40c3ce9d16eae296f086bc4ac4d62deb2affc"
+SRC_URI = "git://github.com/tensorflow/tensorflow.git;branch=r2.6;protocol=https \
            file://0001-support-musl.patch \
            file://0001-use-local-bazel-to-workaround-bazel-paralle-issue.patch \
            file://0001-third_party-eigen_archive-workaround-ice-failure-whi.patch \
            file://0001-drop-bazel_toolchains_repositories-to-support-offlin.patch \
            file://0001-drop-v2-config.patch \
+           file://0002-Replace-distutils.sysconfig.get_python_lib-with-sysc.patch \
+           file://0001-fix-building-from-source-failed-on-Python-3.10-51776.patch \
           "
 
 S = "${WORKDIR}/git"
@@ -37,3 +39,8 @@ TF_CONFIG ?= " \
 "
 
 inherit tensorflow_ver
+
+do_compile:append() {
+    chmod a+w ${BAZEL_DIR}/output_base/execroot/org_tensorflow/bazel-out/*/bin/tensorflow/lite/python/schema_py_srcs_no_include_all || true
+    chmod a+w ${BAZEL_DIR}/output_base/execroot/org_tensorflow/bazel-out/*/bin/tensorflow/lite/python/schema_py_srcs_no_include_all/tflite || true
+}

@@ -1,54 +1,56 @@
-From 52b0c97764b65e4351aa2005217b0827d94b842f Mon Sep 17 00:00:00 2001
+From 32889ecf0115f17374d4ca10523c39456718696f Mon Sep 17 00:00:00 2001
 From: Hongxu Jia <hongxu.jia@windriver.com>
-Date: Sat, 12 Dec 2020 21:41:29 +0800
+Date: Tue, 17 Aug 2021 16:17:13 +0800
 Subject: [PATCH] support 32 bit x64 and arm for yocto
 
 Upstream-Status: Inappropriate [oe specific]
 
 Signed-off-by: Hongxu Jia <hongxu.jia@windriver.com>
 ---
- tensorflow/BUILD                              |  1 -
- tensorflow/workspace.bzl                      |  1 +
+ tensorflow/BUILD                              |  3 --
+ tensorflow/workspace2.bzl                     |  1 +
  .../0001-XNNPACK-support-32-bit-x86.patch     | 29 +++++++++++++++++++
  third_party/aws/BUILD.bazel                   |  6 ++++
  third_party/aws/aws-c-common.bazel            |  9 ++++++
  third_party/cpuinfo/BUILD.bazel               |  1 -
- 6 files changed, 45 insertions(+), 2 deletions(-)
+ 6 files changed, 45 insertions(+), 4 deletions(-)
  create mode 100644 third_party/0001-XNNPACK-support-32-bit-x86.patch
 
 diff --git a/tensorflow/BUILD b/tensorflow/BUILD
-index 85e172afa03..4d2d90cd755 100644
+index b8b81fa1791..6859f75ed94 100644
 --- a/tensorflow/BUILD
 +++ b/tensorflow/BUILD
-@@ -86,7 +86,6 @@ config_setting(
- config_setting(
-     name = "android_x86",
-     values = {
--        "crosstool_top": "//external:android/crosstool",
-         "cpu": "x86",
-     },
+@@ -108,9 +108,6 @@ config_setting(
+         {},
+     ),
+     values = dict(
+-        if_oss(
+-            {"crosstool_top": "//external:android/crosstool"},
+-        ),
+         cpu = "x86",
+     ),
      visibility = ["//visibility:public"],
-diff --git a/tensorflow/workspace.bzl b/tensorflow/workspace.bzl
-index f6c47187c54..fce3c53fff0 100755
---- a/tensorflow/workspace.bzl
-+++ b/tensorflow/workspace.bzl
-@@ -140,6 +140,7 @@ def tf_repositories(path_prefix = "", tf_repo_name = ""):
+diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
+index c9f89f47dfa..c28ed10e448 100644
+--- a/tensorflow/workspace2.bzl
++++ b/tensorflow/workspace2.bzl
+@@ -137,6 +137,7 @@ def _tf_repositories():
          name = "XNNPACK",
-         sha256 = "4b199c96fb2d551450b48eb5549843b41c023ad200aa86760a7c56d0dc0da806",
-         strip_prefix = "XNNPACK-68447302abcfad0d4b6b19a1efe7d7eef8833f4a",
-+        patch_file = clean_dep("//third_party:0001-XNNPACK-support-32-bit-x86.patch"),
+         sha256 = "e1fee5a16e4a06d3bd77ab33cf87b1c6d826715906248a308ab790486198d3c9",
+         strip_prefix = "XNNPACK-476eb84d6a8e6f8249d5584d30759c6fbdbf791d",
++        patch_file = "//third_party:0001-XNNPACK-support-32-bit-x86.patch",
          urls = [
-             "https://storage.googleapis.com/mirror.tensorflow.org/github.com/google/XNNPACK/archive/68447302abcfad0d4b6b19a1efe7d7eef8833f4a.zip",
-             "https://github.com/google/XNNPACK/archive/68447302abcfad0d4b6b19a1efe7d7eef8833f4a.zip",
+             "https://storage.googleapis.com/mirror.tensorflow.org/github.com/google/XNNPACK/archive/476eb84d6a8e6f8249d5584d30759c6fbdbf791d.zip",
+             "https://github.com/google/XNNPACK/archive/476eb84d6a8e6f8249d5584d30759c6fbdbf791d.zip",
 diff --git a/third_party/0001-XNNPACK-support-32-bit-x86.patch b/third_party/0001-XNNPACK-support-32-bit-x86.patch
 new file mode 100644
-index 00000000000..9e9ae3bb554
+index 00000000000..2141c37236b
 --- /dev/null
 +++ b/third_party/0001-XNNPACK-support-32-bit-x86.patch
 @@ -0,0 +1,29 @@
-+From be12104d25bf9a74daeabd6eae388291196ebdc1 Mon Sep 17 00:00:00 2001
++From 2345756776fa09fd95e29f96f781e15e3b18a61b Mon Sep 17 00:00:00 2001
 +From: Hongxu Jia <hongxu.jia@windriver.com>
-+Date: Fri, 11 Dec 2020 23:29:23 +0800
++Date: Tue, 17 Aug 2021 01:09:53 -0700
 +Subject: [PATCH] XNNPACK: support 32 bit x86
 +
 +Use android_x86 as a workaround to support 32 bit x86
@@ -61,10 +63,10 @@ index 00000000000..9e9ae3bb554
 + 1 file changed, 1 deletion(-)
 +
 +diff --git a/BUILD.bazel b/BUILD.bazel
-+index ec7d05a..be0beba 100644
++index 27ab07c9..f223d2ab 100644
 +--- a/BUILD.bazel
 ++++ b/BUILD.bazel
-+@@ -6475,7 +6475,6 @@ config_setting(
++@@ -8783,7 +8783,6 @@ config_setting(
 + config_setting(
 +     name = "android_x86",
 +     values = {
@@ -73,7 +75,7 @@ index 00000000000..9e9ae3bb554
 +     },
 + )
 +-- 
-+2.18.2
++2.30.2
 +
 diff --git a/third_party/aws/BUILD.bazel b/third_party/aws/BUILD.bazel
 index e1058edaba4..a86591997f3 100644
@@ -113,10 +115,10 @@ index ab9406805c2..d1078b0d701 100644
              "source/posix/*.c",
          ]),
 diff --git a/third_party/cpuinfo/BUILD.bazel b/third_party/cpuinfo/BUILD.bazel
-index 9b007cc0daa..1fca02facfc 100644
+index eb2937d20ef..7c435fe6595 100644
 --- a/third_party/cpuinfo/BUILD.bazel
 +++ b/third_party/cpuinfo/BUILD.bazel
-@@ -248,7 +248,6 @@ config_setting(
+@@ -266,7 +266,6 @@ config_setting(
  config_setting(
      name = "android_x86",
      values = {
@@ -125,5 +127,5 @@ index 9b007cc0daa..1fca02facfc 100644
      },
      visibility = ["//visibility:public"],
 -- 
-2.18.2
+2.27.0
 

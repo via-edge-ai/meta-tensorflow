@@ -1,13 +1,13 @@
 DEPENDS += "bazel-native \
            openjdk-8-native \
           "
-DEPENDS_append_class-target = " python3"
+DEPENDS:append:class-target = " python3"
 
 inherit bazel-base
 
 BAZEL_DIR ?= "${WORKDIR}/bazel"
 BAZEL_OUTPUTBASE_DIR ?= "${BAZEL_DIR}/output_base"
-export BAZEL_ARGS="--output_user_root=${BAZEL_DIR}/user_root \
+export BAZEL_STARTUP_OPTIONS="--output_user_root=${BAZEL_DIR}/user_root \
                    --output_base=${BAZEL_OUTPUTBASE_DIR} \
                    --bazelrc=${S}/bazelrc \
                    --batch  \
@@ -19,7 +19,7 @@ do_prepare_recipe_sysroot[postfuncs] += "do_install_bazel"
 do_install_bazel() {
     mkdir -p ${BAZEL_DIR}
     install -m 0755 ${STAGING_BINDIR_NATIVE}/bazel ${BAZEL_DIR}
-    create_cmdline_wrapper ${BAZEL} \$BAZEL_ARGS
+    create_cmdline_wrapper ${BAZEL} \$BAZEL_STARTUP_OPTIONS
     zip -A ${BAZEL}.real
 }
 
@@ -118,7 +118,7 @@ EOF
 
 }
 
-bazel_do_configure_append_class-target () {
+bazel_do_configure:append:class-target () {
     cat >> "${S}/bazelrc" <<-EOF
 # FLAGS begin
 ${@bazel_get_target_flags(d)}
